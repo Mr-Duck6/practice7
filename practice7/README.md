@@ -1,17 +1,54 @@
-# practice7
+# Practice 7: Варіант 1 - "Бібліотека коледжу"
 
-A new Flutter project.
+Мобільний застосунок для пошуку, перегляду та бронювання книжок бібліотеки коледжу, розроблений на базі Flutter із використанням сучасного менеджера маршрутизації go_router.
 
-## Getting Started
+---
 
-This project is a starting point for a Flutter application.
+## Архітектура та ключові особливості
 
-A few resources to get you started if this is your first Flutter project:
+1. Нижня навігація (StatefulShellRoute.indexedStack):
+   - Інтерфейс розділено на 3 основні вкладки: Каталог, Мої книги та Профіль.
+   - Стан та позиція прокрутки кожної вкладки повністю зберігаються під час перемикання між ними.
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+2. Маршрутизація та Параметри:
+   - Підтримуються параметри запиту для фільтрації каталогів (/catalog?genre=...).
+   - Використовуються динамічні параметри шляху для перегляду карток книг (/catalog/book/:bookId).
+   - Картка книги коректно працює і без об'єкта extra, здійснюючи пошук необхідної книги безпосередньо за її bookId.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+3. Захист маршрутів (Guard):
+   - Реалізовано через механізм redirect та refreshListenable у GoRouter.
+   - При спробі відкрити захищений маршрут бронювання (/catalog/book/:bookId/reserve) без авторизації користувач автоматично перенаправляється на екрану входу (/login), після чого повертається назад до початкової цілі.
+
+4. Повернення результатів та безпека виходу:
+   - Використання стандартного підходу context.push<T>() та context.pop(value)` для передачі вибраної дати повернення книги назад на форму бронювання.
+   - Екран профілю захищений за допомогою PopScope, що запобігає випадковому виходу з незбереженими змінами без підтвердження через діалогове вікно.
+
+5. Обробка помилок та Глибокі посилання:
+   - Налаштовано власний errorBuilder для перехоплення невідомих адрес.
+   - Задекларовано підтримку кастомної схеми у конфігураційних файлах AndroidManifest.xml та Info.plist.
+
+---
+
+## Карта маршрутів
+
+| Шлях                                        | Екран              | Захист / Авторизація |
+| :------------------------------------------ | :----------------- | :------------------- |
+| `/catalog?genre=...`                        | `CatalogScreen`    | —                    |
+| `/catalog/book/:bookId`                     | `BookScreen`       | —                    |
+| `/catalog/book/:bookId/reserve`             | `ReserveScreen`    | Потрібен вхід        |
+| `/catalog/book/:bookId/reserve/date-picker` | `DatePickerScreen` | Потрібен вхід        |
+| `/my-books`                                 | `MyBooksScreen`    | —                    |
+| `/profile`                                  | `ProfileScreen`    | —                    |
+| `/login`                                    | `LoginScreen`      | —                    |
+
+---
+
+## Інструкція запуску та перевірки Deep Link
+
+- Встановіть залежності:
+  ```bash
+  flutter pub get
+  ```
+- Перейти з No Device на Start Medium Phone API 35 mobile emulator (cold boot).
+- Створити новий термінал.
+- Ввести команду futter run.
